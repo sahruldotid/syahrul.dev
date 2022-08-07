@@ -9,7 +9,7 @@ enableRobotsTXT = true
 googleAnalytics = 'XXXXX'
 hasCJKLanguage = true
 paginate = 5
-publishDir = 'docs'
+publishDir = 'public'
 title = 'Syahrul Personal Website'
 theme = 'june'
 
