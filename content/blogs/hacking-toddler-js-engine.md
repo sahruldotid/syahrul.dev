@@ -19,67 +19,52 @@ This article is a writeup of a challenge from [KalmarCTF](https://kalmarc.tf/) c
 ## What is MJS ?
 
 MJS is a javascript engine written in C. The source code is available [here](https://github.com/cesanta/mjs). The engine is a very simple and had few builtin function. for example :
-<dl>
-  <dt><tt>print(arg1, arg2, ...);</tt></dt>
-  <dd>Print arguments to stdout, separated by space.</dd>
+- `print(arg1, arg2, ...);`
+Print arguments to stdout, separated by space.
 
-  <dt><tt>load('file.js', obj);</tt></dt>
-  <dd>Execute file <tt>file.js</tt>. <tt>obj</tt> paramenter is
-  optional. <tt>obj</tt> is a global namespace object.
-  If not specified, a current global namespace is passed to the script,
-  which allows <tt>file.js</tt> to modify the current namespace.</dd>
+- `load('file.js', obj);`
+    Execute file `file.js`. `obj` parameter is optional. `obj` is a global namespace object. If not specified, a current global namespace is passed to the script, which allows `file.js` to modify the current namespace.
 
-  <dt><tt>die(message);</tt></dt>
-  <dd>Exit interpreter with the given error message</dd>
+- `die(message);`
+    Exit interpreter with the given error message.
 
-  <dt><tt>let value = JSON.parse(str);</tt></dt>
-  <dd>Parse JSON string and return parsed value.</dd>
+- `let value = JSON.parse(str);`
+    Parse JSON string and return parsed value.
 
-  <dt><tt>let str = JSON.stringify(value);</tt></dt>
-  <dd>Get string representation of the mJS value.</dd>
+- `let str = JSON.stringify(value);`
+    Get string representation of the mJS value.
 
-  <dt><tt>let proto = {foo: 1}; let o = Object.create(proto);</tt></dt>
-  <dd>Create an object with the provided prototype.</dd>
+- `let proto = {foo: 1}; let o = Object.create(proto);`
+    Create an object with the provided prototype.
 
-  <dt><tt>'some_string'.slice(start, end);</tt></dt>
-  <dd>Return a substring between two indices. Example:
-      <tt>'abcdef'.slice(1,3) === 'bc';</tt></dd>
+- `'some_string'.slice(start, end);`
+    Return a substring between two indices. Example: `'abcdef'.slice(1,3) === 'bc';`
 
-  <dt><tt>'abc'.at(0);</tt></dt>
-  <dd>Return numeric byte value at given string index. Example:
-      <tt>'abc'.at(0) === 0x61;</tt></dd>
+- `'abc'.at(0);`
+    Return numeric byte value at given string index. Example: `'abc'.at(0) === 0x61;`
 
-  <dt><tt>'abc'.indexOf(substr[, fromIndex]);</tt></dt>
-  <dd>Return index of first occurence of substr within the string or `-1`
-  if not found.
-      <tt>'abc'.indexOf('bc') === 1;</tt></dd>
+- `'abc'.indexOf(substr[, fromIndex]);`
+    Return index of first occurrence of substr within the string or `-1` if not found. Example: `'abc'.indexOf('bc') === 1;`
 
-  <dt><tt>chr(n);</tt></dt>
-  <dd>Return 1-byte string whose ASCII code is the integer `n`. If `n` is
-    not numeric or outside of `0-255` range, `null` is returned. Example:
-      <tt>chr(0x61) === 'a';</tt></dd>
+- `chr(n);`
+    Return 1-byte string whose ASCII code is the integer `n`. If `n` is not numeric or outside of `0-255` range, `null` is returned. Example: `chr(0x61) === 'a';`
 
-  <dt><tt>let a = [1,2,3,4,5]; a.splice(start, deleteCount, ...);</tt></dt>
-  <dd>Change the contents of an array by removing existing elements and/or
-    adding new elements. Example:
-  <tt>let a = [1,2,3,4,5]; a.splice(1, 2, 100, 101, 102); a === [1,100,101,102,4,5];</tt></dd>
-<s>
-  <dt><tt>let s = mkstr(ptrVar, length);</tt></dt>
-  <dd>Create a string backed by a C memory chunk. A string <tt>s</tt> starts
-  at memory location <tt>ptrVar</tt>, and is <tt>length</tt> bytes long.</dd>
+- `let a = [1,2,3,4,5]; a.splice(start, deleteCount, ...);`
+    Change the contents of an array by removing existing elements and/or adding new elements. Example: `let a = [1,2,3,4,5]; a.splice(1, 2, 100, 101, 102); a === [1,100,101,102,4,5];`
 
-  <dt><tt>let s = mkstr(ptrVar, offset, length, copy = false);</tt></dt>
-  <dd>Like `mkstr(ptrVar, length)`, but string <tt>s</tt> starts
-  at memory location <tt>ptrVar + offset</tt>, and the caller can specify
-  whether the string needs to be copied to the internal mjs buffer. By default
-  it's not copied.</dd>
+- `let s = mkstr(ptrVar, length);`
+    Create a string backed by a C memory chunk. A string `s` starts at memory location `ptrVar`, and is `length` bytes long.
 
-  <dt><tt>let f = ffi('int foo(int)');</tt></dt>
-  <dd>Import C function into mJS. See next section.</dd>
+- `let s = mkstr(ptrVar, offset, length, copy = false);`
+    Like `mkstr(ptrVar, length)`, but string `s` starts at memory location `ptrVar + offset`, and the caller can specify whether the string needs to be copied to the internal mjs buffer. By default, it's not copied.
 
-  <dt><tt>gc(full);</tt></dt>
-  <dd>Perform garbage collection. If `full` is `true`, reclaim RAM to OS.</s></dd>
-</dl>
+- `let f = ffi('int foo(int)');`
+    Import C function into mJS. See next section.
+
+- `gc(full);`
+    Perform garbage collection. If `full` is `true`, reclaim RAM to OS.
+
+
 
 
 ## Challenge 
