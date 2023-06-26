@@ -1,7 +1,7 @@
 ---
 title: "CVE-2023-31039: Dont Steal My First CVE"
 date: 2023-06-26T17:54:07+07:00
-draft: true
+draft: false
 iscjklanguage: false
 isarchived: false
 categories: ["Security Research"]
