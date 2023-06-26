@@ -80,9 +80,9 @@ theme = 'june'
     # get from https://giscus.app/
     [params.june.giscus]
       Repo =  "sahruldotid/syahrul.dev"
-      RepoID = "R_kgDOHx_RKg"
+      RepoID = "R_kgDOHyAXRA"
       Category = "General"
-      CategoryID = "DIC_kwDOHx_RKs4CQq6"
+      CategoryID = "DIC_kwDOHyAXRM4CXeoP"
       Mapping = "title"
       Reaction = "1"
       Metadata = "0"
