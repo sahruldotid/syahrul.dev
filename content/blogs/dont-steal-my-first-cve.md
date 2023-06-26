@@ -109,7 +109,7 @@ Few days without any response, i found that the maintainer released new version 
 This is exactly same as the occurence of the vulnerability in my report and the date is obviously after my report. So i think this is a good sign that the maintainer has fixed the vulnerability.
 ![](https://user-images.githubusercontent.com/11147011/248798665-5f8002bd-d278-4d67-bb2f-c9fd79c69206.png)
 
-Then i contacted the admin of huntr.dev what the status of my report now. One of the admin said that Apache is probably strategically delaying the publication of the vulnerability report. At first place i think maybe i need to wait more. But after few days, i found that the vulnerability has been published on [CVE-2023-31039](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-31039) and [NVD](https://nvd.nist.gov/vuln/detail/CVE-2023-31039) with the date 2021-05-08. 
+Then i contacted the admin of huntr.dev about status of my report now. One of the admin said that Apache is probably strategically delaying the publication of the vulnerability report. At first place i think maybe i need to wait more. But after few days, i found that the vulnerability has been published on [CVE-2023-31039](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-31039) and [NVD](https://nvd.nist.gov/vuln/detail/CVE-2023-31039) with the date 2021-05-08. 
 
 This CVE date is exactly after i reported this vulnerability and the maintainer didnt event resolve my report at huntr.dev anymore. My patience is running out, through discord DM, i contacted one of the huntr.dev admin and they said: 
 ![](https://user-images.githubusercontent.com/11147011/248801845-86b6bf09-8e63-480c-852d-be75dfc138f5.png)
