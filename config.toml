@@ -10,7 +10,7 @@ googleAnalytics = 'XXXXX'
 hasCJKLanguage = true
 paginate = 5
 publishDir = 'public'
-title = 'Syahrul's Personal Website'
+title = "Syahrul's Personal Website"
 theme = 'june'
 
 [markup]
