@@ -51,7 +51,7 @@ theme = 'june'
 
 [author]
   Name = "Syahrul Akbar R"
-  Email = 'sahruldotid@gmail.com'
+  Email = 'me@syahrul.dev'
 
 [params]
   [params.june]
@@ -63,7 +63,7 @@ theme = 'june'
 
     [[params.june.contact]]
       Name = "Email"
-      URL  = "mailto:sahruldotid@gmail.com"
+      URL  = "mailto:me@syahrul.dev"
 
     [[params.june.contact]]
       Name = "Github"
