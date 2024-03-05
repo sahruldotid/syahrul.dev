@@ -49,6 +49,11 @@ theme = 'june'
       url = '/blogs/'
       weight = 2
 
+    [[languages.en.menu.main]]
+      name = 'CV'
+      url = 'https://cv.syahrul.dev'
+      weight = 3
+
 [author]
   Name = "Syahrul Akbar R"
   Email = 'me@syahrul.dev'
