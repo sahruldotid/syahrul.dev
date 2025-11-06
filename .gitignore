@@ -1,0 +1,21 @@
+# Hugo generated files
+/public/
+/resources/_gen/
+/data/
+/dist/ # If you use a build process that outputs to 'dist'
+
+# Hugo cache
+.hugo_build.lock
+.hugo_build.log
+
+# Editor and OS related files
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+.idea/
+.vscode/
+
+# Other potential temporary or local files
+temp/
+tmp/
